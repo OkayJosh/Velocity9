@@ -21,10 +21,11 @@ class Daemon:
 
             if pid > 0:
                 # Exit the parent process
+                LOG.info("Exiting the parent Process")
                 sys.exit(0)
 
         except OSError as e:
-            LOG.INFO(f"Failed to fork process: {e}\n")
+            LOG.info(f"Failed to fork process: {e}\n")
             sys.exit(1)
 
         # Change the working directory to root
@@ -45,7 +46,7 @@ class Daemon:
                 sys.exit(0)
 
         except OSError as e:
-            LOG.INFO(f"Failed to fork process: {e}\n")
+            LOG.info(f"Failed to fork process: {e}\n")
             sys.exit(1)
 
         # Redirect standard file descriptors to devnull or specified files
@@ -68,11 +69,12 @@ class Daemon:
     def start(self):
         # Check if the process is already running
         if self.is_process_running():
-            LOG.INFO("Process is already running.")
+            LOG.info("Process is already running.")
             sys.exit(1)
 
         # Start the daemonization process
         self.daemonize()
+        LOG.info("Deamon Started")
 
         # Perform any additional setup or initialization here
 
@@ -82,7 +84,7 @@ class Daemon:
     def stop(self):
         # Check if the process is not running
         if not self.is_process_running():
-            LOG("Process is not running.")
+            LOG.info("Process is not running.")
             sys.exit(1)
 
         # Get the PID from the PID file
@@ -93,7 +95,7 @@ class Daemon:
             # Terminate the process
             os.kill(pid, 15)
         except OSError as e:
-            LOG.INFO(f"Failed to stop process: {e}")
+            LOG.info(f"Failed to stop process: {e}")
             sys.exit(1)
 
         # Remove the PID file
