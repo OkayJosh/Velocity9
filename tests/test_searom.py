@@ -1,5 +1,7 @@
 import unittest
 import os
+import zlib
+import urllib.error
 from unittest import mock
 
 from searom import Downloader
@@ -22,8 +24,14 @@ class DownloaderTestCase(unittest.TestCase):
     def tearDown(self):
         # Clean up test data
         if os.path.exists(self.save_directory):
-            # os.rmdir(self.save_directory)
-            pass
+            # Remove files within the directory
+            for root, dirs, files in os.walk(self.save_directory, topdown=False):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    os.remove(file_path)
+
+            # Remove the directory
+            os.rmdir(self.save_directory)
 
     def test_download_url(self):
         with mock.patch("urllib.request.urlopen") as mock_urlopen:
@@ -42,6 +50,37 @@ class DownloaderTestCase(unittest.TestCase):
         # Assert that the file is downloaded and exists in the save directory
             file_path = os.path.join(self.save_directory, "file.txt")
             self.assertTrue(os.path.exists(file_path))
+
+    def test_download_url_for_encoded_content(self):
+        with mock.patch("urllib.request.urlopen") as mock_urlopen:
+            # Set up mock response
+            mock_response = mock.Mock()
+            mock_response.headers = {
+                "Content-Disposition": 'attachment; filename="file.txt"',
+                "Content-Length": '0',
+                "Content-Encoding": "gzip",  # Set the content encoding to gzip
+            }
+            mock_response.read.return_value = zlib.compress(b"Mock file content")  # Compress the content
+            mock_urlopen.return_value = mock_response
+            self.create_chunk_part_file(filename="file.txt", chunks=self.downloader.num_chunks)
+            # Download the file
+            self.downloader.download_url(self.url, self.save_directory)
+
+            # Assert that the file is downloaded and exists in the save directory
+            file_path = os.path.join(self.save_directory, "file.txt")
+            self.assertTrue(os.path.exists(file_path))
+
+    def test_download_url_with_error_104(self):
+        with mock.patch("urllib.request.urlopen") as mock_urlopen:
+            # Set up mock response for Error 104
+            mock_urlopen.side_effect = urllib.error.URLError(reason="Error 104: Connection reset by peer")
+
+            # Download the file
+            self.downloader.download_url(self.url, self.save_directory)
+
+        # Assert that the file is not downloaded and does not exist in the save directory
+        file_path = os.path.join(self.save_directory, "file.txt")
+        self.assertFalse(os.path.exists(file_path))
 
     def test_truncate_filename(self):
         # Test truncation of a long filename
