@@ -33,10 +33,6 @@ class Downloader(Daemon):
         if (chunk_url, chunk_save_path, range_header) not in self.downloaded_chunks:
             for _ in range(self.retries):
                 try:
-                    if os.path.exists(chunk_save_path):
-                        resume_header = f"bytes={os.path.getsize(chunk_save_path)}-"
-                        range_header = resume_header + range_header
-
                     req = urllib.request.Request(chunk_url, headers={"Range": range_header})
 
                     # Enable compression
