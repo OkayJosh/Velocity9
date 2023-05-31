@@ -18,6 +18,6 @@ if __name__ == "__main__":
         downloader = Downloader(pidfile, "")
         downloader.stop()
     else:
-        print("Usage: python download.py start <url>\n"
-              "python download.py stop")
+        print("Usage: python main.py start <url>\n"
+              "python main.py stop")
         sys.exit(2)

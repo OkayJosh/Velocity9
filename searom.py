@@ -131,8 +131,9 @@ class Downloader(Daemon):
 
             LOG.info("Download completed successfully!")
             # clean up .crdownload
-            crdownload_path = os.path.join(save_directory, f"{file_name}.crdownload")
-            os.remove(crdownload_path)
+            files = os.listdir(self.save_directory)
+            # Filter files with .crdownload extension
+            [os.remove(file) for file in files if file.endswith(".crdownload")]
             LOG.info("CRDownload removed successfully!")
         except Exception as e:
             LOG.info(f"An error occurred during the download: {e}")
