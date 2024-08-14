@@ -17,7 +17,7 @@ To use the File Downloader, follow the steps below:
 
 2. Open a terminal or command prompt and navigate to the directory containing `main.py`.
 
-3. Run the following command to start the download:
+3. Run the following command to start the download, remember to include the download url:
 
    ```bash
    python main.py start <url>
